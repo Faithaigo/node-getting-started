@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-app.set('view engine', 'pug') //set any values globally to the express app
+app.set('view engine', 'ejs') //set any values globally to the express app
 app.set('views','views') //location of templates
 
 const adminData = require('./routes/admin');
