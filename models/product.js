@@ -15,11 +15,15 @@ const getProductsFromFile = (cb) =>{
 }
 
 module.exports = class Product{
-    constructor(title){
+    constructor(title,imageUrl, description, price){
         this.title = title
+        this.imageUrl = imageUrl
+        this.description = description
+        this.price = price
     }
 
     save(){
+        console.log('product',this)
         getProductsFromFile((products)=>{
             products.push(this)
             fs.writeFile(p,JSON.stringify(products),(err)=>{
@@ -31,7 +35,6 @@ module.exports = class Product{
     //static makes you call a method directly on a class
     static fetchAll(cb){ //cb is a callback that executes once fetchAll is done executing
         getProductsFromFile(cb)
-    
     }
 
 }

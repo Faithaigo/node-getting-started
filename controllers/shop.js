@@ -8,7 +8,7 @@ exports.getProducts = (req, res, next) => {
         res.render('shop', {
             prods: products,
             pageTitle: 'Shop',
-            path: '/',
+            path: '/'
           });
     })
    
@@ -21,6 +21,13 @@ exports.getCart = (req, res, next) => {
     });
   }
 
+exports.getOrders = (req, res, next) => {
+    res.render('shop/orders', {
+        pageTitle: 'Your Orders',
+        path: '/orders',
+    });
+}
+
 exports.getAllProducts = (req, res, next) => {
 
   Product.fetchAll((products)=>{
@@ -30,7 +37,7 @@ exports.getAllProducts = (req, res, next) => {
         path: '/products',
       });
   })
-  }
+}
 
   exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
