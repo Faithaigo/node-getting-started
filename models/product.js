@@ -23,6 +23,7 @@ module.exports = class Product{
     }
 
     save(){
+        this.id = Math.random().toString();
         console.log('product',this)
         getProductsFromFile((products)=>{
             products.push(this)
@@ -35,6 +36,13 @@ module.exports = class Product{
     //static makes you call a method directly on a class
     static fetchAll(cb){ //cb is a callback that executes once fetchAll is done executing
         getProductsFromFile(cb)
+    }
+
+    static findById(id, cb){
+        getProductsFromFile(products=>{
+            const product = products.find(p=>p.id === id)
+            cb(product)
+        })
     }
 
 }
