@@ -4,6 +4,29 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
         <main>
-            <h1>Nothing there!</h1>
+            <% if (orders.length > 0){ %>
+                <ul>
+                    <%orders.forEach(order=>{ %>
+                        <li>
+                            <h1># <%= order.id %></h1>
+                            <ul>
+                                <%order.products.forEach(order=>{ %>
+                                    <li>
+                                        <h1># <%= order.id %></h1>
+                                        <ul>
+                                            
+                                        </ul>
+                                    </li>
+                                <% }) %> 
+                            </ul>
+                        </li>
+                    <% }) %>
+                </ul>
+                <form action="/create-order" method="post">
+                    <button type="submit" class="btn">Order Now!</button>
+                </form>
+            <%} else { %>
+                <h1>No products in cart</h1>
+            <% } %>
         </main>
         <%- include('../includes/end.ejs') %>

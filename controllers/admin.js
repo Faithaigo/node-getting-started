@@ -15,17 +15,32 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl
     const description = req.body.description
     const price = req.body.price
-    Product.create({
+    //Product is the name of the model, createProduct comes as a resul of associations
+    req.user.createProduct({
         title,
         price,
         imageUrl,
-        description
+        description,
     }).then(result=>{
         console.log('Created product')
         res.redirect('/admin/products')
     }).catch(err=>{
         console.log(err)
     })
+
+    //alternative way
+    // Product.create({
+    //     title,
+    //     price,
+    //     imageUrl,
+    //     description,
+    //     userId:req.user.id
+    // }).then(result=>{
+    //     console.log('Created product')
+    //     res.redirect('/admin/products')
+    // }).catch(err=>{
+    //     console.log(err)
+    // })
     // const product = new Product(null,title, imageUrl, description, price)
     // product.save().then(()=>{
     //     //send response
@@ -42,7 +57,9 @@ exports.getEditProduct = (req, res, next) => {
         return res.redirect('/')
     }
     const prodId = req.params.productId
-    Product.findByPk(prodId).then(product=>{
+    //get products for a logged in user
+    req.user.getProducts({where:{id:prodId}}).then(products=>{
+        const product = products[0]
         if (!product){
             return res.redirect('/')
         }
@@ -55,6 +72,20 @@ exports.getEditProduct = (req, res, next) => {
     }).catch(err=>{
         console.log(err)
     })
+
+    // Product.findByPk(prodId).then(product=>{
+    //     if (!product){
+    //         return res.redirect('/')
+    //     }
+    //     res.render('admin/edit-product', {
+    //         pageTitle: 'Edit  Product',
+    //         path: '/admin/edit-product',
+    //         editing:editMode,
+    //         product
+    //     });
+    // }).catch(err=>{
+    //     console.log(err)
+    // })
 }
 
 exports.postEditProduct = (req, res, next) =>{
@@ -91,7 +122,8 @@ exports.deleteProduct = (req, res, next) =>{
 }
 
 exports.getAdminProducts = (req, res, next) => {
-    Product.findAll().then(products=>{
+    //get products for a spcific user
+    req.user.getProducts().then(products=>{
         res.render('admin/products', {
             prods:products,
             pageTitle: 'Admin Products',
@@ -100,4 +132,14 @@ exports.getAdminProducts = (req, res, next) => {
     }).catch(err=>{
         console.log(err)
     })
+
+    // Product.findAll().then(products=>{
+    //     res.render('admin/products', {
+    //         prods:products,
+    //         pageTitle: 'Admin Products',
+    //         path: '/admin/products',
+    //     });
+    // }).catch(err=>{
+    //     console.log(err)
+    // })
   }
