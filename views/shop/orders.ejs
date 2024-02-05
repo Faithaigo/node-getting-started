@@ -10,13 +10,10 @@
                         <li>
                             <h1># <%= order.id %></h1>
                             <ul>
-                                <%order.products.forEach(order=>{ %>
-                                    <li>
-                                        <h1># <%= order.id %></h1>
-                                        <ul>
-                                            
-                                        </ul>
-                                    </li>
+                                <%order.products.forEach(product=>{ %>
+                                    <ul>
+                                        <li><%= product.title  %> <%= product.orderItem.quantity %></li>
+                                    </ul>
                                 <% }) %> 
                             </ul>
                         </li>
