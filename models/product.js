@@ -3,20 +3,35 @@ const mongodb = require('mongodb')
 const {getDb} = require('../util/database')
 
 class Product{
-    constructor(title, price, description, imageUrl){
+    constructor(title, price, description, imageUrl, id){
         this.title = title
         this.price = price
         this.description = description
         this.imageUrl = imageUrl
+        this._id = new mongodb.ObjectId(id)
     }
 
     save(){
         const db = getDb();
-        return db.collection('products').insertOne(this).then(result=>{
+        let dbOp;
+        if(this._id){
+            /**
+             * Update product
+             * updateOne doesn't replace that's why we use $set to set the values
+             * this is a new object
+             */
+             dbOp =  db.collection('products').updateOne({_id: this._id}, {
+                $set:this
+             })
+        }else{
+          dbOp =  db.collection('products').insertOne(this)
+        }
+        return dbOp.then(result=>{
             console.log('inserted product', result)
         }).catch(err=>{
             console.log(err)
-        })
+        }) 
+        
     }
 
     static fetchAll(){
