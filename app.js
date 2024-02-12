@@ -53,7 +53,6 @@ mongoose.connect(dbUri).then(()=>{
       user.save()      
     }
   })
- 
   app.listen(5000)
 }).catch(err=>{
   console.log(err)

@@ -76,7 +76,10 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
   Product.find()
+  // .select('title price -_id') // - Excludes items
+  // .populate('userId', 'name') // get all the details of the related collection, second argument is what is supposed to be included
   .then(products => {
+    console.log('admin products', products)
       res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',
