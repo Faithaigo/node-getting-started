@@ -2,12 +2,10 @@ const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const errorController = require('./controllers/error');
-
-
-const User = require('./models/user')
-
+const User = require('./models/user');
 
 const app = express();
 
@@ -16,18 +14,14 @@ app.set('views', 'views');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
-const mongoose = require('mongoose')
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  User.findById('65c5b6d1c84c0e600dfc08ef')
+  User.findById('5bab316ce0a7c75f783cb8a8')
     .then(user => {
-      /**
-       * user is a full mongoose model
-       */
-      req.user = user
+      req.user = user;
       next();
     })
     .catch(err => console.log(err));
@@ -38,25 +32,25 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-const dbUri = "mongodb+srv://aigofaith:WxkHZ0KA7lwk41Xf@cluster0.pkwhwvs.mongodb.net/shop?retryWrites=true&w=majority"
-
-mongoose.connect(dbUri).then(()=>{
-  User.findOne().then(user=>{
-    if(!user){
-      const user = new User({
-          name:'Faith',
-          email:'faith@gmail.com',
-          cart:{
-            items:[]
+mongoose
+  .connect(
+    'mongodb+srv://aigofaith:WxkHZ0KA7lwk41Xf@cluster0.pkwhwvs.mongodb.net/shop?retryWrites=true&w=majority'
+  )
+  .then(result => {
+    User.findOne().then(user => {
+      if (!user) {
+        const user = new User({
+          name: 'Max',
+          email: 'max@test.com',
+          cart: {
+            items: []
           }
-      })
-      user.save()      
-    }
+        });
+        user.save();
+      }
+    });
+    app.listen(5000);
   })
-  app.listen(5000)
-}).catch(err=>{
-  console.log(err)
-})
-
-
-
+  .catch(err => {
+    console.log(err);
+  });
