@@ -33,14 +33,17 @@ app.use(express.static(path.join(__dirname, 'public')));
  */
 app.use(session({secret: 'my secret', resave:false, saveUninitialized:false, store}))
 
-// app.use((req, res, next) => {
-//   User.findById('65c5b6d1c84c0e600dfc08ef')
-//     .then(user => {
-//       req.user = user;
-//       next();
-//     })
-//     .catch(err => console.log(err));
-// });
+app.use((req, res, next) => {
+  if(!req.session.user){
+    return next()
+  }
+  User.findById(req.session.user._id)
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
