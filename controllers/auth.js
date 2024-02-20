@@ -1,45 +1,73 @@
-const User = require('../models/user')
+const bcrypt = require('bcryptjs')
+
+const User = require('../models/user');
 
 exports.getLogin = (req, res, next) => {
-  // const isLoggedIn = req.get('Cookie').split(';')[2]?.trim().split('=')[1] === 'true'
-  console.log(req.session)
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
-    isAuthenticated: req.isLoggedIn
+    isAuthenticated: false
+  });
+};
+
+exports.getSignup = (req, res, next) => {
+  res.render('auth/signup', {
+    path: '/signup',
+    pageTitle: 'Signup',
+    isAuthenticated: false
   });
 };
 
 exports.postLogin = (req, res, next) => {
-  /**
-   * Max-Age is thee number in seconds how long that cookie should stay around
-   * Secure sets the cookie if the page is served via https
-   * HttpOnly- can't access the value through client side javascript, protects us from cross-site scripting
-   */
-  // res.setHeader('Set-Cookie','isLoggedIn=true; Secure')
-
-
-  User.findById('65c5b6d1c84c0e600dfc08ef')
-  .then(user => {
-    req.session.isLoggedIn = true
-    req.session.user = user;
-    req.session.save(err=>{
-      console.log(err);
-      res.redirect('/')
+  const email = req.body.email
+  const password = req.body.password
+  User.findOne({email:email})
+    .then(user => {
+      if(!user){
+        return res.redirect('/login')
+      }
+      //compare passwords
+      bcrypt.compare(password, user.password).then((doMatch)=>{
+        if(doMatch){
+          req.session.isLoggedIn = true;
+          req.session.user = user;
+          return req.session.save(err => {
+            console.log(err);
+            res.redirect('/');
+          });
+        }
+        res.redirect('/login')
+      }).catch(err=>{
+        console.log(err)
+        res.redirect('/login')
+      })
+    
     })
-   
-  })
-  .catch(err => console.log(err));
-
-  /**
-   * redirection created a brand new request
-   */
- 
+    .catch(err => console.log(err));
 };
 
-exports.postLogout = (req, res, next) =>{
-  req.session.destroy((err)=>{
+exports.postSignup = (req, res, next) => {
+  const email = req.body.email
+  const password = req.body.password
+  const confirmPassword = req.body.confirmPassword
+  User.findOne({email:email}).then(userDoc=>{
+    if(userDoc){
+      return res.redirect('/signup')
+    }
+    return bcrypt.hash(password, 12).then(hashPassword=>{
+      const user = new User({email, password:hashPassword, cart:{items:[]}})
+      return user.save()
+    })
+  }).then(result=>{
+    res.redirect('/login')
+  }).catch(err=>{
     console.log(err)
-    res.redirect('/')
   })
-}
+};
+
+exports.postLogout = (req, res, next) => {
+  req.session.destroy(err => {
+    console.log(err);
+    res.redirect('/');
+  });
+};
