@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
 const nodemailer = require('nodemailer')
 const sendgridTransport = require('nodemailer-sendgrid-transport')
-const {apiKey} = require('../apiKeys')
+const { validationResult} = require('express-validator') //gather all the errors the validation middleware in the routes might have thrown
+
 
 /**
  * Create secure unique random values
@@ -13,6 +14,8 @@ const User = require('../models/user');
 /**
  * Tell nodemailer how the emails will be delivered
  */
+
+const apiKey = 'add sendgrid api key here'
 const transporter = nodemailer.createTransport(sendgridTransport({
   auth:{
     api_key:apiKey
@@ -50,6 +53,14 @@ exports.getSignup = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
+  const errors = validationResult(req)
+  if(!errors.isEmpty()){
+    return res.status(422).render('auth/login', {
+      path: '/login',
+      pageTitle: 'Login',
+      errorMessage: errors.array()[0].msg,
+    });
+  }
   User.findOne({email:email})
     .then(user => {
       if(!user){
@@ -81,26 +92,37 @@ exports.postSignup = (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
   const confirmPassword = req.body.confirmPassword
-  User.findOne({email:email}).then(userDoc=>{
-    if(userDoc){
-      req.flash('error','Email exists already, please pick a different one')
-      return res.redirect('/signup')
-    }
-    return bcrypt.hash(password, 12).then(hashPassword=>{
-      const user = new User({email, password:hashPassword, cart:{items:[]}})
-      return user.save()
+  /**
+   * call validation result on the request becuase the middleware will pass the errors in the errors object
+   */
+  const errors = validationResult(req)
+ 
+  if(!errors.isEmpty()){
+    /**
+     * status 422 is for invalid errors
+     * Render the page again if there is any error
+     */
+    return res.status(422).render('auth/signup', {
+      path: '/signup',
+      pageTitle: 'Signup',
+      errorMessage: errors.array()[0].msg,
     })
-  }).then(result=>{
+  }
+  bcrypt.hash(password, 12)
+  .then(hashPassword=>{
+    const user = new User({email, password:hashPassword, cart:{items:[]}})
+    return user.save()
+  })
+  .then(result=>{
     res.redirect('/login')
     return transporter.sendMail({
       to:email,
       from:'aigofaith@gmail.com',
       subject:'Sign up succeeded!',
       html: '<h1>You successfully signed up!</h2>'
-    }).catch(err=>{
-      console.log(err)
-    }) 
-  }).catch(err=>{
+    })
+  })
+  .catch(err=>{
     console.log(err)
   })
 };
