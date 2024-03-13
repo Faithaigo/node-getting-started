@@ -9,11 +9,13 @@ const router = express.Router();
 router.get('/login', authController.getLogin);
 
 router.get('/signup', authController.getSignup);
-
-router.post('/login', [check('email').isEmail().withMessage('Please enter a valid email'),
+/**
+ * Sanitizing data means storing it in a uniform format
+ */
+router.post('/login', [check('email').isEmail().withMessage('Please enter a valid email').normalizeEmail(),
 body('password',
     'Please enter a password with at least 5 characters'
-    ).isLength({min:5}).isAlphanumeric()], authController.postLogin);
+    ).isLength({min:5}).isAlphanumeric().trim()], authController.postLogin);
 
 
 router.post('/signup', 
