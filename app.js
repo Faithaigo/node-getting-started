@@ -51,19 +51,6 @@ app.use(session({secret: 'my secret', resave:false, saveUninitialized:false, sto
 app.use(csrfProtection)
 app.use(flash())
 
-
-app.use((req, res, next) => {
-  if(!req.session.user){
-    return next()
-  }
-  User.findById(req.session.user._id)
-    .then(user => {
-      req.user = user;
-      next();
-    })
-    .catch(err => console.log(err));
-});
-
 //set local variables that are passed in the views
 app.use((req, res, next)=>{
   res.locals.isAuthenticated =  req.session.isLoggedIn,
@@ -71,11 +58,45 @@ app.use((req, res, next)=>{
   next()
 })
 
+/**
+ * Executes for every incominng request
+ */
+app.use((req, res, next) => {
+  if(!req.session.user){
+    return next()
+  }
+  User.findById(req.session.user._id)
+    .then(user => {
+      if(!user){
+        return next
+      }
+      req.user = user;
+      next();
+    })
+    .catch(err => {
+      console.log(err)
+      // throw new Error(err) // this won't excecute the error handling middleware because inside of async code we have to use next, inn sync code we can throw errors without using next
+      next(new Error(err))
+    });
+});
+
+
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.get('/500', errorController.get500)
+
 app.use(errorController.get404);
+
+//Error handling middleware
+//Throwing errors inside an async code wonn't reach this middleware
+app.use((err, req, res, next)=>{
+  res.status(500).render('500', { pageTitle: 'Server Error', path: '/500', isAuthenticated: req.session.isLoggedIn });
+
+  // res.redirect('/500')
+})
 
 mongoose
   .connect(MONGOBD_URI)

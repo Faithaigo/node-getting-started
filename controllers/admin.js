@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const mongoose = require('mongoose')
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -28,7 +29,10 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect('/admin/products');
     })
     .catch(err => {
-      console.log(err);
+      const error =  new Error(err)
+      error.httpStatusCode = 500
+      return next(error) //let express know that an error occurred and it will skip all other middlewares and move to the error handling middleware
+      // res.redirect('/500')
     });
 };
 
@@ -51,7 +55,12 @@ exports.getEditProduct = (req, res, next) => {
   
       });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error =  new Error(err)
+      error.httpStatusCode = 500
+      return next(error) //let express know that an error occurred and it will skip all other middlewares and move to the error handling middleware
+      // res.redirect('/500')
+    });
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -74,7 +83,12 @@ exports.postEditProduct = (req, res, next) => {
         console.log('UPDATED PRODUCT!');
         res.redirect('/admin/products');
       })
-    }).catch(err => console.log(err));
+    }).catch(err => {
+      const error =  new Error(err)
+      error.httpStatusCode = 500
+      return next(error) //let express know that an error occurred and it will skip all other middlewares and move to the error handling middleware
+      // res.redirect('/500')
+    });
 };
 
 exports.getProducts = (req, res, next) => {
@@ -89,7 +103,12 @@ exports.getProducts = (req, res, next) => {
   
       });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error =  new Error(err)
+      error.httpStatusCode = 500
+      return next(error) //let express know that an error occurred and it will skip all other middlewares and move to the error handling middleware
+      // res.redirect('/500')
+    });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -99,5 +118,10 @@ exports.postDeleteProduct = (req, res, next) => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error =  new Error(err)
+      error.httpStatusCode = 500
+      return next(error) //let express know that an error occurred and it will skip all other middlewares and move to the error handling middleware
+      // res.redirect('/500')
+    });
 };
